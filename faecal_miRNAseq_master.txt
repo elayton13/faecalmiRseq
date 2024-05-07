@@ -1,0 +1,62 @@
+#!/bin/bash -l
+
+## see README before running script for required packages and versions 
+
+#### REMOVE ADAPTOR SEQUENCE ####
+# adaptor sequence here is from the NEB NEBNext small RNA library building kit
+# output file should have the suffix .fastq
+# input file is .fastq.gz
+
+cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC --trim-n -q 20,20 -m 18 -M 26 -o <path_to_output_file> <path_to_input_file>
+
+echo trim complete
+
+#### REMOVE tRNA ####
+# map to tRNA reference with zero mismatches
+# output file should have suffix .sam
+
+bowtie --threads 16 -v 0 -S -a <path_to_indexed_tRNA_ref_file> <path_to_input_trimmed_fastq_generated_by_previous_step> <path_to_output_tRNA_samfile>
+
+# convert to bam
+# output file should have suffix .bam
+samtools view -@ 16 -b <path_to_input_tRNA_samfile_generated_by_previous_step> > <path_to_output_bam_file>
+
+# create a fastq of unmapped reads (take only tRNA unmapped reads forward)
+# output file should have suffix .fastq
+samtools fastq -f 4 <path_to_bam_file_generated_by_previous_step> > <path_to_output_file>
+
+echo map to tRNA complete
+
+#### REMOVE rRNA ####
+# map to rRNA reference with zero mismatches
+# output file should have suffix .sam
+
+bowtie --threads 16 -v 0 -S -a <path_to_indexed_rRNA_ref_file> <path_to_input_fastq_generated_by_previous_step> <path_to_output_rRNA_samfile>
+
+# convert to bam
+samtools view -@ 16 -b <path_to_input_rRNA_samfile_generated_by_previous_step> > <path_to_output_bam_file>
+
+# create a fastq of unmapped reads (take only tRNA & now rRNA unmapped reads forward)
+# output file should have suffix .fastq
+samtools fastq -f 4 <path_to_bam_file_generated_by_previous_step> > <path_to_output_file>
+
+echo map to rRNA complete
+
+#### MAP REMAINING READS TO MOUSE GENOME ####
+
+bowtie  -v 1 -m 10 -S -a --best --strata <path_to_indexed_mouse_genome_referenec <path_to_bam_file_from_previous_step> <path_to_output_samfile>
+
+echo bowtie to mouse complete
+
+samtools view -@ 16 -b <path_to_sam_file_from_previous_step> > <path_to_output_bamfile>
+
+samtools sort -@ 16 <path_to_bam_file_from_previous_step> -o <path_to_sorted_bam_file>
+
+samtools index <path_to_sorted_bam_file_from_previous_step>
+
+echo sam to bam mouse complete
+
+#### COUNT READS MAPPED TO miRNA LOCI WITH FEATURECOUNTS ####
+# output file requires suffix featureCountsSTR.txt
+
+featureCounts -T 16 -t miRNA -g ID -s 1 -F GTF -a <path_to_mmu.gff3_from_miRbase> -o <path_to_output_file> <path_to_sorted_bam_file_from_previous_step>
