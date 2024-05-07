@@ -7,7 +7,7 @@ bowtie/1.1.1
 samtools/1.4  
 subread/1.6.0  
 
-And the following reference files:
+And the following reference files:  
 tRNA reference file e.g. from GtRNAdb 2.0 --> http://gtrnadb.ucsc.edu  
 rRNA reference e.g. from RNA central --> https://rnacentral.org  
 mouse genome reference e.g. from --> https://www.ncbi.nlm.nih.gov  
