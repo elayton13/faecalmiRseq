@@ -1,7 +1,7 @@
 # faecalmiRseq
 Pipeline for identifying miRNAs in small RNA sequencing data of mouse faecal samples
 
-This pipeline requires the following packages:
+This pipeline requires the following packages:  
 cutadapt/1.8  
 bowtie/1.1.1  
 samtools/1.4  
