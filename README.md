@@ -17,3 +17,5 @@ And the following input files:
 all reference files (not the miRNA genome annotation file) need to be indexed prior to use using bowtie-build  
 e.g. bowtie-build <path_to_ref_fna_file> <path_to_output_file>  
 output file should have the suffix .ind 
+
+Please note that there may be newer versions of each of these packages that may contain bug fixes if problems are encountered.
